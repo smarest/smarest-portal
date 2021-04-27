@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+{{template "header" .}}
+
+<body>
+	{{template "title" .}}
+	<div class="dragbar-container">
+		<div class="dragbar-container__left">
+			<table id="ordered_list_table">
+				<tr>
+					<th>Ban</th>
+					<th>[{{ len $.resource.Orders }}] mon</th>
+					<th class="white-space--nowrap" colspan="3">Tong tien [
+						{{ $.resource.Comma $.resource.SumOrdersPrice}}
+						<!--?php echo number_format(array_sum(array_column($resource->orders,'price')))." VND"; ?-->]
+					</th>
+				</tr>
+				{{ range $.resource.Orders }}
+				<tr class="margin">
+					<td>
+						<strong class="white-space--nowrap rounded background-color--gray padding">{{ .tableName }}</strong>
+					</td>
+					<td class="width--full text-align--left padding"><strong class="color--blue">{{ .productName }}</strong>
+						<div>{{ .comment }}</div>
+					</td>
+					<td class="white-space--nowrap text-align--right">
+						<span class="rounded background-color--yellow padding">{{ $.resource.Comma ( $.resource.Int64 .price ) }}</span>
+					</td>
+				</tr>
+				{{ end }}
+			</table>
+		</div>
+		<div class="dragbar-container__dragbar"></div>
+		<div class="dragbar-container__right">
+			<div class="dragbar-container__right__top">
+				<input id="moneyInput" type="text" name="money" placeholder="So tien"
+					class="font-size--normal padding--10" required autofocus>
+				<input class="button--right-rounded hover--green font-size--normal padding--10" type="submit"
+					value="Nhap">
+			</div>
+			<div class="dragbar-container__right__bottom">
+				<div class="soft-keyboard">
+					<div class="hover--green" onclick="onSoftKeyboardNumber(9)">9</div>
+					<div class="hover--green" onclick="onSoftKeyboardNumber(8)">8</div>
+					<div class="hover--green" onclick="onSoftKeyboardNumber(7)">7</div>
+					<div class="hover--green" onclick="onSoftKeyboardNumber(6)">6</div>
+					<div class="hover--green" onclick="onSoftKeyboardNumber(5)">5</div>
+					<div class="hover--green" onclick="onSoftKeyboardNumber(4)">4</div>
+					<div class="hover--green" onclick="onSoftKeyboardNumber(3)">3</div>
+					<div class="hover--green" onclick="onSoftKeyboardNumber(2)">2</div>
+					<div class="hover--green" onclick="onSoftKeyboardNumber(1)">1</div>
+					<div class="hover--green" onclick="onSoftKeyboardNumber('0')">0</div>
+					<div class="hover--blue" onclick="onSoftKeyboardNumber('00')">00</div>
+					<div class="hover--blue" onclick="onSoftKeyboardNumber('000')">000</div>
+					<div class="hover--blue" onclick="onSoftKeyboardNumber('0000')">0,000</div>
+					<div class="hover--blue" onclick="onSoftKeyboardNumber('00000')">00,000</div>
+					<div class="hover--blue" onclick="onSoftKeyboardNumber('000000')">000,000</div>
+					<div class="hover--gray" onclick="onSoftKeyboardNumber('<=')">&lt;&equals;</div>
+					<div class="hover--gray" onclick="onSoftKeyboardNumber('C')">Xoa</div>
+					<div class="hover--gray" onclick="alert('Chuc nang chua xay dung')">Credit</div>
+					<div class="hover--gray" onclick="alert('Chuc nang chua xay dung')">IC Card</div>
+					<div class="hover--gray" onclick="alert('Chuc nang chua xay dung')">Ma khuyen mai</div>
+				</div>
+				{{ if .resource.ErrorMessage }}
+				<div class="alert background-color--red rounded">
+					<span class="alert__closebtn" onclick="onNotifiClose(this)">&times;</span>
+					<strong>Loi!</strong> {{ .resource.ErrorMessage }}
+				</div>
+				{{else if .resource.Message }}
+				<div class="alert background-color--green rounded">
+					<span class="alert__closebtn" onclick="onNotifiClose(this)">&times;</span>
+					{{ .resource.Message }}
+				</div>
+				{{end}}
+			</div>
+		</div>
+	</div>
+</body>
+{{template "footer" .}}
+<script type="text/javascript" src="{{ .resource.DesignUrl }}/js/portal/checkout_script.js"></script>
+
+</html>
