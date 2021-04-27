@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="{{ .resource.DesignUrl }}/css/common_style.css">
+  <link rel="stylesheet" type="text/css" href="{{ .resource.DesignUrl }}/css/portal/restaurant.css">
+</head>
+
+<body>
+  <h2>AnIT POS</h2>
+  <form method="post" action="/portal/restaurant">
+    <div class='container'>
+      <label for='select_restaurant'><b>Restaurant</b></label>
+      <select id="select_restaurant" name='restaurant_id'>
+        <option selected>--- Chon nha hang ---</option>
+        {{ range $.resource.Restaurants }}
+        <option value="{{ .id }}">{{ .name }}</option>
+        {{ end }}
+      </select>
+      
+      <label for='access_key'><b>Password</b></label>
+      <input type='password' placeholder='Access Key' name='access_key' required>
+
+      <label>
+        <input type='checkbox' checked='checked' name='remember'> Remember me
+      </label>
+      <button type='submit'>Access</button>
+      {{ if .resource.ErrorMessage }}
+      <div id='message'>{{ .resource.ErrorMessage }}</div>
+      {{ end }}
+    </div>
+    <input type='hidden' name='frm' value='{{ .resource.FromURL }}'>
+  </form>
+</body>
+
+</html>

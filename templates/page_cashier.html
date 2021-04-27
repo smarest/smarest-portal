@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+{{template "header" .}}
+
+<body>
+	{{template "title" .}}
+	<div class="dragbar-container">
+		<div class="dragbar-container__left">
+			<div class="scroll-menu sticky--top">
+				{{ range $.resource.Areas }}
+				<a class="hover--blue {{if $.resource.IsEqual $.resource.AreaID .id }}active{{end}}" data-id="{{ .id }}"
+					href="#" onclick="loadOrderGroupByTableInArea('{{ .id }}');return false;">{{ .name }}</a>
+				{{ end }}
+			</div>
+			<table id="ordered_list_table">
+				<tr>
+					<th>[Ma] Ban</th>
+					<th class="white-space--nowrap">So mon</th>
+					<th class="white-space--nowrap">Tong tien (VND)</th>
+					<th class="text-align--center">Sua</th>
+					<th class="text-align--center">Xoa</th>
+				</tr>
+				<tbody id="order_body">
+					{{ range $.resource.Orders }}
+					<tr onclick="onOrderTableItemClick({{.orderNumberID}},event)">
+						<td class="text-align--left width--full"><strong class="color--blue">[{{ .orderNumberID }}]{{ .tableName }}</strong></td>
+						<td class="text-align--center"><span class="rounded background-color--green padding">{{ .countSum }}</span></td>
+						<td class="white-space--nowrap text-align--right"><span
+								class="rounded background-color--yellow padding">{{ $.resource.Comma ( $.resource.Int64 .priceSum ) }}</span></td>
+						<td onclick="editOrder(event,{{.orderNumberID}});return false;"><img width="24px" height="24px"
+								src="{{ $.resource.DesignUrl }}/images/ic_edit.png" alt="Them"></td>
+						<td onclick="deleteOrder(event,{{.orderNumberID}});return false;"><img width="24px" height="24px"
+								src="{{ $.resource.DesignUrl }}/images/ic_close.png" alt="Xoa"></td>
+					</tr>
+					{{ end}}
+				</tbody>
+			</table>
+		</div>
+		<div class="dragbar-container__dragbar"></div>
+		<div id="right_container" class="dragbar-container__right">
+			<form action="/portal/checkout" method="get" class="dragbar-container__right__top">
+				<input id="numberIdInput" type="number" name="orderNumberID" class="font-size--normal padding--10"
+					placeholder="Ma goi mon" required autofocus>
+				<input class="button--right-rounded hover--green font-size--normal padding--10" type="submit"
+					value="OK">
+			</form>
+			<div class="soft-keyboard">
+				<div class="hover--green" onclick="onSoftKeyboardNumber(0)">0</div>
+				<div class="hover--green" onclick="onSoftKeyboardNumber(1)">1</div>
+				<div class="hover--green" onclick="onSoftKeyboardNumber(2)">2</div>
+				<div class="hover--green" onclick="onSoftKeyboardNumber(3)">3</div>
+				<div class="hover--green" onclick="onSoftKeyboardNumber(4)">4</div>
+				<div class="hover--green" onclick="onSoftKeyboardNumber(5)">5</div>
+				<div class="hover--green" onclick="onSoftKeyboardNumber(6)">6</div>
+				<div class="hover--green" onclick="onSoftKeyboardNumber(7)">7</div>
+				<div class="hover--green" onclick="onSoftKeyboardNumber(8)">8</div>
+				<div class="hover--green" onclick="onSoftKeyboardNumber(9)">9</div>
+			</div>
+			<!-- TODO notifice for this-->
+			<div class="dragbar-container__right__bottom">
+				{{ if .resource.ErrorMessage }}
+				<div class="alert background-color--red rounded">
+					<span class="alert__closebtn" onclick="onNotifiClose(this)">&times;</span>
+					<strong>Loi!</strong> {{ .resource.ErrorMessage }}
+				</div>
+				{{else if .resource.Message }}
+				<div class="alert background-color--green rounded">
+					<span class="alert__closebtn" onclick="onNotifiClose(this)">&times;</span>
+					{{ .resource.Message }}
+				</div>
+				{{end}}
+			</div>
+		</div>
+	</div>
+</body>
+{{template "footer" .}}
+<script type="text/javascript" src="{{ .resource.DesignUrl }}/js/portal/cashier_script.js"></script>
+
+</html>
