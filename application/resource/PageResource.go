@@ -8,7 +8,7 @@ import (
 )
 
 type PageResource struct {
-	ErrorMessage  string
+	ErrorMessages []string
 	Message       string
 	IsCashier     bool
 	IsOrder       bool
@@ -21,12 +21,26 @@ type PageResource struct {
 	Products      []interface{}
 	Comments      []interface{}
 	AreaID        string
+	RestaurantID  string
 	CategoryID    string
 	LoginUrl      string
 	DesignUrl     string
 	ImageUrl      string
 	PageTitle     string
 	FromURL       string
+}
+
+func (s *PageResource) AddErrorMessage(errMessage string) {
+	if errMessage == "" {
+		return
+	}
+	for _, v := range s.ErrorMessages {
+		if v == errMessage {
+			return
+		}
+	}
+	s.ErrorMessages = append(s.ErrorMessages, errMessage)
+
 }
 
 func (s *PageResource) IsEqual(value1 string, value2 interface{}) bool {
@@ -36,7 +50,7 @@ func (s *PageResource) IsEqual(value1 string, value2 interface{}) bool {
 func (s *PageResource) SumOrdersPrice() int64 {
 	var result = int64(0)
 	for _, item := range s.Orders {
-		result += int64(item.(map[string]interface{})["price"].(float64))
+		result += int64(item.(map[string]interface{})["price"].(float64)) * int64(item.(map[string]interface{})["count"].(float64))
 	}
 	return result
 }
@@ -61,6 +75,10 @@ func (s *PageResource) Int64(value interface{}) int64 {
 	}
 	return 0
 
+}
+
+func (s *PageResource) Mul(value1 int64, value2 int64) int64 {
+	return value1 * value2
 }
 
 func (s *PageResource) Comma(v int64) string {

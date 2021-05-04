@@ -12,7 +12,7 @@ func main() {
 	if err != nil {
 		log.Fatalln("can not create bean", err)
 	}
-
+	//gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	router.HTMLRender = bean.LoadTemplates()
 	portal := router.Group("portal")
@@ -22,6 +22,7 @@ func main() {
 		portal.GET("/checkout", bean.CheckoutService.Get)
 		portal.GET("/restaurant", bean.RestaurantService.Get)
 		portal.POST("/restaurant", bean.RestaurantService.Post)
+		portal.GET("/error", bean.ErrorService.Get)
 	}
 
 	v1 := router.Group("v1")
@@ -30,9 +31,8 @@ func main() {
 		v1.GET("/areas/:id/tables", bean.PortalAPIService.GetTablesByAreaID)
 		v1.GET("/categories", bean.PortalAPIService.GetCategories)
 		v1.GET("/categories/:id/products", bean.PortalAPIService.GetProducts)
-		v1.GET("/comments", bean.PortalAPIService.GetComments)
+		v1.GET("/products/:id/comments", bean.PortalAPIService.GetCommentsByProductID)
 		v1.PUT("/orders", bean.PortalAPIService.PutOrders)
-		v1.DELETE("/orders", bean.PortalAPIService.DeleteOrders)
 	}
 	router.Run(":9090")
 }

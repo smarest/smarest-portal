@@ -2,49 +2,44 @@ package application
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/smarest/smarest-common/application"
-	"github.com/smarest/smarest-portal/application/resource"
-	"github.com/smarest/smarest-portal/infrastructure/persistence"
+	"github.com/smarest/smarest-common/domain/entity/exception"
 )
 
 type OrderService struct {
-	*application.LoginService
-	apiRepository       persistence.APIRepository
-	PageResourceFactory resource.PageResourceFactory
+	Bean *Bean
 }
 
-func NewOrderService(loginService *application.LoginService, APIRepository persistence.APIRepository, pageResourceFactory resource.PageResourceFactory) *OrderService {
-	return &OrderService{loginService, APIRepository, pageResourceFactory}
+func NewOrderService(bean *Bean) *OrderService {
+	return &OrderService{bean}
 }
 
 func (s *OrderService) Get(c *gin.Context) {
-	/*	_, err := s.CheckCookie(c)
-		if err != nil {
-			c.Redirect(http.StatusMovedPermanently, s.GetLoginUrl(c))
-			return
-		}
-	*/
-	resource := s.PageResourceFactory.CreateResource()
+	cookieCheckResult := s.Bean.CookieCheckService.Check(c)
+	if cookieCheckResult.IsRedirect() {
+		c.Redirect(http.StatusMovedPermanently, cookieCheckResult.RedirectURL)
+		return
+	}
+
+	resource := s.Bean.PageResourceFactory.CreateResource()
 	resource.IsOrder = true
 	resource.PageTitle = "Order"
 
-	areas, err := s.apiRepository.GetAreasByRestaurantID(1)
+	areas, err := s.Bean.APIRepository.GetAreasByRestaurantID(cookieCheckResult.Restaurant.ID)
 	if err != nil {
-		log.Print(err.ErrorMessage)
-		resource.ErrorMessage = "Co loi trong he thong, vui long lien he bo phan ky thuat"
+		s.Bean.ErrorService.HandlerError(c, err)
+		return
 	} else {
 		resource.Areas = areas
 		if len(areas) > 0 {
 			areaID := int64(areas[0].(map[string]interface{})["id"].(float64))
-			resource.Tables, err = s.apiRepository.GetTablesByAreaID(areaID)
+			resource.Tables, err = s.Bean.APIRepository.GetRestaurantTablesByAreaID(cookieCheckResult.Restaurant.ID, areaID)
 			if err != nil {
-				log.Print(err.ErrorMessage)
-				resource.ErrorMessage = "Co loi trong he thong, vui long lien he bo phan ky thuat"
+				s.Bean.ErrorService.HandlerError(c, err)
+				return
 			}
 			resource.AreaID = fmt.Sprint(areaID)
 		}
@@ -55,37 +50,33 @@ func (s *OrderService) Get(c *gin.Context) {
 	if orderNumberIDStr != "" {
 		orderNumberIDInt, paramErr := strconv.ParseInt(orderNumberIDStr, 0, 64)
 		if paramErr != nil {
-			resource.ErrorMessage = "orderNumberID invalid."
+			s.Bean.ErrorService.HandlerError(c, exception.CreateError(exception.CodeValueInvalid, paramErr.Error()))
+			return
 		} else {
-			orders, err := s.apiRepository.GetOrdersByOrderNumberID(orderNumberIDInt)
+			orders, err := s.Bean.APIRepository.GetRestaurantOrdersByOrderNumberID(cookieCheckResult.Restaurant.ID, orderNumberIDInt)
 			if err != nil {
-				log.Printf("GetOrdersByOrderNumberID: %s", err.ErrorMessage)
-				resource.ErrorMessage = "Co loi trong he thong, vui long lien he bo phan ky thuat"
+				s.Bean.ErrorService.HandlerError(c, err)
+				return
 			}
 			resource.Orders = orders
 			resource.OrderNumberID = orderNumberIDStr
 		}
 	}
 
-	resource.Categories, err = s.apiRepository.GetCategories()
+	resource.Categories, err = s.Bean.APIRepository.GetCategoriesByGroupID(cookieCheckResult.Restaurant.RestaurantGroupID)
 	if err != nil {
-		log.Printf("GetCategories: %s", err.ErrorMessage)
-		resource.ErrorMessage = "Co loi trong he thong, vui long lien he bo phan ky thuat"
+		s.Bean.ErrorService.HandlerError(c, err)
+		return
 	} else {
 		if len(resource.Categories) > 0 {
 			categoryID := int64(resource.Categories[0].(map[string]interface{})["id"].(float64))
-			resource.Products, err = s.apiRepository.GetProductsByRestaurantIDAndCategoryID(1, categoryID)
+			resource.Products, err = s.Bean.APIRepository.GetProductsByRestaurantIDAndCategoryID(cookieCheckResult.Restaurant.ID, categoryID)
 			if err != nil {
-				log.Print(err.ErrorMessage)
-				resource.ErrorMessage = "Co loi trong he thong, vui long lien he bo phan ky thuat"
+				s.Bean.ErrorService.HandlerError(c, err)
+				return
 			}
 			resource.CategoryID = fmt.Sprint(categoryID)
 		}
-	}
-	resource.Comments, err = s.apiRepository.GetComments()
-	if err != nil {
-		log.Printf("GetComments: %s", err.ErrorMessage)
-		resource.ErrorMessage = "Co loi trong he thong, vui long lien he bo phan ky thuat"
 	}
 
 	c.HTML(http.StatusOK, "order", gin.H{

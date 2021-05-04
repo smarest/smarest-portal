@@ -6,30 +6,27 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/smarest/smarest-common/application"
 	"github.com/smarest/smarest-common/domain/entity"
 	"github.com/smarest/smarest-common/domain/entity/exception"
-	"github.com/smarest/smarest-portal/infrastructure/persistence"
 )
 
 //https://github.com/gin-gonic/gin/issues/339#issuecomment-111694462
 
 type PortalAPIService struct {
-	*application.LoginService
-	apiRepository persistence.APIRepository
+	Bean *Bean
 }
 
-func NewPortalAPIService(loginService *application.LoginService, APIRepository persistence.APIRepository) *PortalAPIService {
-	return &PortalAPIService{apiRepository: APIRepository}
+func NewPortalAPIService(bean *Bean) *PortalAPIService {
+	return &PortalAPIService{bean}
 }
 
 func (s *PortalAPIService) GetOrdersByAreaID(c *gin.Context) {
-	/*	_, err := s.CheckCookie(c)
-		if err != nil {
-			c.Redirect(http.StatusMovedPermanently, s.GetLoginUrl(c))
-			return
-		}
-	*/
+	cookieCheckResult := s.Bean.CookieCheckService.Check(c)
+	if cookieCheckResult.IsRedirect() {
+		c.JSON(http.StatusUnauthorized, exception.GetError(exception.CodeSignatureInvalid))
+		return
+	}
+
 	areaId, paramErr := strconv.ParseInt(c.Params.ByName("id"), 0, 64)
 	if paramErr != nil {
 		log.Print(paramErr)
@@ -37,7 +34,7 @@ func (s *PortalAPIService) GetOrdersByAreaID(c *gin.Context) {
 		return
 	}
 
-	var orders, err = s.apiRepository.GetOrdersByAreaID(areaId)
+	var orders, err = s.Bean.APIRepository.GetRestaurantOrdersByAreaID(cookieCheckResult.Restaurant.ID, areaId)
 	if err != nil {
 		log.Print(err.ErrorMessage)
 		c.JSON(http.StatusNotFound, exception.CreateError(exception.CodeNotFound, "order not found."))
@@ -47,13 +44,13 @@ func (s *PortalAPIService) GetOrdersByAreaID(c *gin.Context) {
 }
 
 func (s *PortalAPIService) GetCategories(c *gin.Context) {
-	/*	_, err := s.CheckCookie(c)
-		if err != nil {
-			c.Redirect(http.StatusMovedPermanently, s.GetLoginUrl(c))
-			return
-		}
-	*/
-	var orders, err = s.apiRepository.GetCategories()
+	cookieCheckResult := s.Bean.CookieCheckService.Check(c)
+	if cookieCheckResult.IsRedirect() {
+		c.JSON(http.StatusUnauthorized, exception.GetError(exception.CodeSignatureInvalid))
+		return
+	}
+
+	var orders, err = s.Bean.APIRepository.GetCategoriesByGroupID(cookieCheckResult.Restaurant.RestaurantGroupID)
 	if err != nil {
 		log.Print(err.ErrorMessage)
 		c.JSON(http.StatusNotFound, exception.CreateError(exception.CodeNotFound, "order not found."))
@@ -62,14 +59,21 @@ func (s *PortalAPIService) GetCategories(c *gin.Context) {
 	c.JSON(http.StatusOK, orders)
 }
 
-func (s *PortalAPIService) GetComments(c *gin.Context) {
-	/*	_, err := s.CheckCookie(c)
-		if err != nil {
-			c.Redirect(http.StatusMovedPermanently, s.GetLoginUrl(c))
-			return
-		}
-	*/
-	var results, err = s.apiRepository.GetComments()
+func (s *PortalAPIService) GetCommentsByProductID(c *gin.Context) {
+	cookieCheckResult := s.Bean.CookieCheckService.Check(c)
+	if cookieCheckResult.IsRedirect() {
+		c.JSON(http.StatusUnauthorized, exception.GetError(exception.CodeSignatureInvalid))
+		return
+	}
+
+	productID, paramErr := strconv.ParseInt(c.Params.ByName("id"), 0, 64)
+	if paramErr != nil {
+		log.Print(paramErr)
+		c.JSON(http.StatusBadRequest, exception.CreateError(exception.CodeValueInvalid, "categoryID invalid."))
+		return
+	}
+
+	var results, err = s.Bean.APIRepository.GetRestaurantCommentsByProductID(cookieCheckResult.Restaurant.ID, productID)
 	if err != nil {
 		log.Print(err.ErrorMessage)
 		c.JSON(http.StatusNotFound, exception.CreateError(exception.CodeNotFound, "comments not found."))
@@ -79,12 +83,12 @@ func (s *PortalAPIService) GetComments(c *gin.Context) {
 }
 
 func (s *PortalAPIService) GetProducts(c *gin.Context) {
-	/*	_, err := s.CheckCookie(c)
-		if err != nil {
-			c.Redirect(http.StatusMovedPermanently, s.GetLoginUrl(c))
-			return
-		}
-	*/
+	cookieCheckResult := s.Bean.CookieCheckService.Check(c)
+	if cookieCheckResult.IsRedirect() {
+		c.JSON(http.StatusUnauthorized, exception.GetError(exception.CodeSignatureInvalid))
+		return
+	}
+
 	categoryID, paramErr := strconv.ParseInt(c.Params.ByName("id"), 0, 64)
 	if paramErr != nil {
 		log.Print(paramErr)
@@ -92,7 +96,7 @@ func (s *PortalAPIService) GetProducts(c *gin.Context) {
 		return
 	}
 
-	var products, err = s.apiRepository.GetProductsByRestaurantIDAndCategoryID(1, categoryID)
+	var products, err = s.Bean.APIRepository.GetProductsByRestaurantIDAndCategoryID(cookieCheckResult.Restaurant.ID, categoryID)
 	if err != nil {
 		log.Print(err.ErrorMessage)
 		c.JSON(http.StatusNotFound, exception.CreateError(exception.CodeNotFound, "products not found."))
@@ -102,12 +106,12 @@ func (s *PortalAPIService) GetProducts(c *gin.Context) {
 }
 
 func (s *PortalAPIService) GetTablesByAreaID(c *gin.Context) {
-	/*	_, err := s.CheckCookie(c)
-		if err != nil {
-			c.Redirect(http.StatusMovedPermanently, s.GetLoginUrl(c))
-			return
-		}
-	*/
+	cookieCheckResult := s.Bean.CookieCheckService.Check(c)
+	if cookieCheckResult.IsRedirect() {
+		c.JSON(http.StatusUnauthorized, exception.GetError(exception.CodeSignatureInvalid))
+		return
+	}
+
 	areaId, paramErr := strconv.ParseInt(c.Params.ByName("id"), 0, 64)
 	if paramErr != nil {
 		log.Print(paramErr)
@@ -115,7 +119,7 @@ func (s *PortalAPIService) GetTablesByAreaID(c *gin.Context) {
 		return
 	}
 
-	var orders, err = s.apiRepository.GetTablesByAreaID(areaId)
+	var orders, err = s.Bean.APIRepository.GetRestaurantTablesByAreaID(cookieCheckResult.Restaurant.ID, areaId)
 	if err != nil {
 		log.Print(err.ErrorMessage)
 		c.JSON(http.StatusNotFound, exception.CreateError(exception.CodeNotFound, "table not found."))
@@ -125,14 +129,13 @@ func (s *PortalAPIService) GetTablesByAreaID(c *gin.Context) {
 }
 
 func (s *PortalAPIService) PutOrders(c *gin.Context) {
-	/*	_, err := s.CheckCookie(c)
-		if err != nil {
-			c.Redirect(http.StatusMovedPermanently, s.GetLoginUrl(c))
-			return
-		}
-	*/
-	waiterID := "dienami"
-	restaurantID := int64(1)
+	cookieCheckResult := s.Bean.CookieCheckService.Check(c)
+	if cookieCheckResult.IsRedirect() {
+		c.JSON(http.StatusUnauthorized, exception.GetError(exception.CodeSignatureInvalid))
+		return
+	}
+
+	waiterID := cookieCheckResult.User.UserName
 
 	orderRequest := entity.OrderRequest{}
 	if err := c.ShouldBindJSON(&orderRequest); err != nil {
@@ -141,25 +144,13 @@ func (s *PortalAPIService) PutOrders(c *gin.Context) {
 		return
 	}
 	orderRequest.WaiterID = &waiterID
-	orderRequest.RestaurantID = &restaurantID
+	orderRequest.RestaurantID = &cookieCheckResult.Restaurant.ID
 
-	log.Printf("%+v", orderRequest)
-	var orders, err = s.apiRepository.PutOrders(orderRequest)
+	var orders, err = s.Bean.APIRepository.PutRestaurantOrders(cookieCheckResult.Restaurant.ID, orderRequest)
 	if err != nil {
 		log.Print(err.ErrorMessage)
 		c.JSON(http.StatusNotFound, exception.CreateError(exception.CodeNotFound, "table not found."))
 		return
 	}
 	c.JSON(http.StatusOK, orders)
-}
-
-func (s *PortalAPIService) DeleteOrders(c *gin.Context) {
-	/*	_, err := s.CheckCookie(c)
-		if err != nil {
-			c.Redirect(http.StatusMovedPermanently, s.GetLoginUrl(c))
-			return
-		}
-	*/
-
-	c.JSON(http.StatusOK, nil)
 }
