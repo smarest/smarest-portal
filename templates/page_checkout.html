@@ -61,12 +61,13 @@
 					<div class="hover--gray" onclick="alert('Chuc nang chua xay dung')">IC Card</div>
 					<div class="hover--gray" onclick="alert('Chuc nang chua xay dung')">Ma khuyen mai</div>
 				</div>
-				{{ if .resource.ErrorMessage }}
+				{{ range .resource.ErrorMessages }}
 				<div class="alert background-color--red rounded">
 					<span class="alert__closebtn" onclick="onNotifiClose(this)">&times;</span>
 					<strong>Loi!</strong> {{ .resource.ErrorMessage }}
 				</div>
-				{{else if .resource.Message }}
+				{{end}}
+				{{if .resource.Message }}
 				<div class="alert background-color--green rounded">
 					<span class="alert__closebtn" onclick="onNotifiClose(this)">&times;</span>
 					{{ .resource.Message }}

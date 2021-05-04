@@ -5,60 +5,47 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/smarest/smarest-common/application"
-	"github.com/smarest/smarest-portal/application/resource"
-	"github.com/smarest/smarest-portal/infrastructure/persistence"
+	"github.com/smarest/smarest-common/domain/entity/exception"
 )
 
 type CheckoutService struct {
-	*application.LoginService
-	apiRepository       persistence.APIRepository
-	PageResourceFactory resource.PageResourceFactory
+	Bean *Bean
 }
 
-func NewCheckoutService(loginService *application.LoginService, APIRepository persistence.APIRepository, pageResourceFactory resource.PageResourceFactory) *CheckoutService {
-	return &CheckoutService{loginService, APIRepository, pageResourceFactory}
+func NewCheckoutService(bean *Bean) *CheckoutService {
+	return &CheckoutService{bean}
 }
 
 func (s *CheckoutService) Get(c *gin.Context) {
-	/*	_, err := s.CheckCookie(c)
-		if err != nil {
-			c.Redirect(http.StatusMovedPermanently, s.GetLoginUrl(c))
-			return
-		}
-	*/
-	resource := s.PageResourceFactory.CreateResource()
+	cookieCheckResult := s.Bean.CookieCheckService.Check(c)
+	if cookieCheckResult.IsRedirect() {
+		c.Redirect(http.StatusMovedPermanently, cookieCheckResult.RedirectURL)
+		return
+	}
+
+	resource := s.Bean.PageResourceFactory.CreateResource()
 	resource.IsCashier = true
 	resource.PageTitle = "Checkout"
 
 	orderNumberIDStr := c.Query("orderNumberID")
 	if orderNumberIDStr == "" {
-		resource.ErrorMessage = "orderNumberID required."
-		c.HTML(http.StatusOK, "checkout", gin.H{
-			"resource": resource,
-		})
+		s.Bean.ErrorService.HandlerError(c, exception.CreateError(exception.CodeValueInvalid, "orderNumberID is required"))
 		return
 	}
 
 	orderNumberIDInt, paramErr := strconv.ParseInt(orderNumberIDStr, 0, 64)
 	if paramErr != nil {
-		resource.ErrorMessage = "orderNumberID invalid."
-		c.HTML(http.StatusOK, "checkout", gin.H{
-			"resource": resource,
-		})
+		s.Bean.ErrorService.HandlerError(c, exception.CreateError(exception.CodeValueInvalid, "orderNumberID invalid."))
 		return
 	}
-	orders, err := s.apiRepository.GetOrdersByOrderNumberID(orderNumberIDInt)
+	orders, err := s.Bean.APIRepository.GetRestaurantOrdersByOrderNumberID(cookieCheckResult.Restaurant.ID, orderNumberIDInt)
 	if err != nil {
-		resource.ErrorMessage = err.ErrorMessage
-		c.HTML(http.StatusOK, "checkout", gin.H{
-			"resource": resource,
-		})
+		s.Bean.ErrorService.HandlerError(c, err)
 		return
 	}
+
 	resource.Orders = orders
-	c.HTML(http.StatusOK, "checkout", gin.H{
+	c.HTML(http.StatusOK, PageCheckout, gin.H{
 		"resource": resource,
 	})
-	return
 }

@@ -38,13 +38,13 @@
         </tr>
         {{ range $.resource.Orders }}
         <tr data-order-id="{{ .id }}" data-table-id="{{ .tableID }}" data-pid="{{ .productID }}"
-          data-name="{{ .productName }}" data-count="{{ .count }}" data-price="{{ $.resource.Int64 .price }}">
+          data-name="{{ .productName }}" data-count="{{ $.resource.Int64 .count }}" data-price="{{ $.resource.Int64 .price }}">
           <td><strong class="white-space--nowrap rounded background-color--gray padding">{{ .tableName }}</strong></td>
-          <td class="width--full"><strong class="color--blue">{{ .productName }}</strong>
+          <td class="width--full"><strong class="color--blue">[{{ .count }}]{{ .productName }}</strong>
             <div>{{ .comments }}</div>
           </td>
           <td class="text-align--right white-space--nowrap"><span class="rounded background-color--yellow padding">{{
-              $.resource.Comma ( $.resource.Int64 .price ) }}</span></td>
+              $.resource.Comma ( $.resource.Mul ($.resource.Int64 .count) ($.resource.Int64 .price)) }}</span></td>
           <td class="text-align--center"><img onclick="onAddRow(this)" width="24px" height="24px"
               src="{{ $.resource.DesignUrl }}/images/ic_add.png" alt="Them"></td>
           <td class="text-align--center"><img onclick="onDeleteRow(this)" width="24px" height="24px"
@@ -77,17 +77,18 @@
           <div class="hover--green" onclick="onOrderProductCommentClick('{{.name}}');">{{.name}}</div>
           {{end}}
         </div>
-        {{ if .resource.ErrorMessage }}
-        <div class="alert background-color--red rounded">
-          <span class="alert__closebtn" onclick="onNotifiClose(this)">&times;</span>
-          <strong>Loi!</strong> {{ .resource.ErrorMessage }}
-        </div>
-        {{else if .resource.Message }}
-        <div class="alert background-color--green rounded">
-          <span class="alert__closebtn" onclick="onNotifiClose(this)">&times;</span>
-          {{ .resource.Message }}
-        </div>
-        {{end}}
+				{{ range .resource.ErrorMessages }}
+				<div class="alert background-color--red rounded">
+					<span class="alert__closebtn" onclick="onNotifiClose(this)">&times;</span>
+					<strong>Loi!</strong> {{ .resource.ErrorMessage }}
+				</div>
+				{{end}}
+				{{if .resource.Message }}
+				<div class="alert background-color--green rounded">
+					<span class="alert__closebtn" onclick="onNotifiClose(this)">&times;</span>
+					{{ .resource.Message }}
+				</div>
+				{{end}}
 
       </div>
     </div>

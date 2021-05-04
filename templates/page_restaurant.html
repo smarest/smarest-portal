@@ -9,26 +9,20 @@
 </head>
 
 <body>
-  <h2>AnIT POS</h2>
+  <h2>Smarest</h2>
   <form method="post" action="/portal/restaurant">
     <div class='container'>
       <label for='select_restaurant'><b>Restaurant</b></label>
-      <select id="select_restaurant" name='restaurant_id'>
+      <select id="select_restaurant" name='code'>
         <option selected>--- Chon nha hang ---</option>
         {{ range $.resource.Restaurants }}
-        <option value="{{ .id }}">{{ .name }}</option>
+        <option value="{{ .code }}">{{ .name }}</option>
         {{ end }}
       </select>
-      
-      <label for='access_key'><b>Password</b></label>
-      <input type='password' placeholder='Access Key' name='access_key' required>
 
-      <label>
-        <input type='checkbox' checked='checked' name='remember'> Remember me
-      </label>
-      <button type='submit'>Access</button>
-      {{ if .resource.ErrorMessage }}
-      <div id='message'>{{ .resource.ErrorMessage }}</div>
+      <button type='submit'>OK</button>
+      {{ range .resource.ErrorMessages }}
+      <div id='message'>{{ . }}</div>
       {{ end }}
     </div>
     <input type='hidden' name='frm' value='{{ .resource.FromURL }}'>

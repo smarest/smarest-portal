@@ -8,7 +8,7 @@
 		<div class="dragbar-container__left">
 			<div class="scroll-menu sticky--top">
 				{{ range $.resource.Areas }}
-				<a class="hover--blue {{if $.resource.IsEqual $.resource.AreaID .id }}active{{end}}" data-id="{{ .id }}"
+				<a class="hover--blue {{if $.resource.IsEqual $.resource.AreaID .id }}active{{end}}" data-id="{{ .idHash }}"
 					href="#" onclick="loadOrderGroupByTableInArea('{{ .id }}');return false;">{{ .name }}</a>
 				{{ end }}
 			</div>
@@ -58,12 +58,12 @@
 			</div>
 			<!-- TODO notifice for this-->
 			<div class="dragbar-container__right__bottom">
-				{{ if .resource.ErrorMessage }}
+				{{ range .resource.ErrorMessages }}
 				<div class="alert background-color--red rounded">
-					<span class="alert__closebtn" onclick="onNotifiClose(this)">&times;</span>
-					<strong>Loi!</strong> {{ .resource.ErrorMessage }}
+					<strong>Loi!</strong> {{ . }}
 				</div>
-				{{else if .resource.Message }}
+				{{end}}
+				{{if .resource.Message }}
 				<div class="alert background-color--green rounded">
 					<span class="alert__closebtn" onclick="onNotifiClose(this)">&times;</span>
 					{{ .resource.Message }}

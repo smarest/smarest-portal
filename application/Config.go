@@ -4,14 +4,15 @@ import (
 	"strconv"
 
 	"github.com/gin-contrib/multitemplate"
-	"github.com/smarest/smarest-common/application"
+	common_application "github.com/smarest/smarest-common/application"
 	"github.com/smarest/smarest-common/util"
 	"github.com/smarest/smarest-portal/application/resource"
+	"github.com/smarest/smarest-portal/domain/service"
 	"github.com/smarest/smarest-portal/infrastructure/client"
 	"github.com/smarest/smarest-portal/infrastructure/persistence"
 
-	cClient "github.com/smarest/smarest-common/client"
-	cRepo "github.com/smarest/smarest-common/infrastructure/persistence"
+	common_client "github.com/smarest/smarest-common/client"
+	common_repo "github.com/smarest/smarest-common/infrastructure/persistence"
 )
 
 const (
@@ -19,6 +20,7 @@ const (
 	PageOrder      = "order"
 	PageCheckout   = "checkout"
 	PageRestaurant = "restaurant"
+	PageError      = "error"
 	CommonTitle    = "title"
 	CommonHeader   = "header"
 	CommonFooter   = "footer"
@@ -26,13 +28,24 @@ const (
 )
 
 type Bean struct {
-	PageLayouts       map[string]string
-	CommonLayouts     map[string]string
-	CashierService    *CashierService
-	OrderService      *OrderService
-	CheckoutService   *CheckoutService
-	RestaurantService *RestaurantService
-	PortalAPIService  *PortalAPIService
+	COOKIE_TOKEN_RESTAURANT string
+	PageLayouts             map[string]string
+	CommonLayouts           map[string]string
+	CookieCheckService      *CookieCheckService
+	CashierService          *CashierService
+	OrderService            *OrderService
+	CheckoutService         *CheckoutService
+	RestaurantService       *RestaurantService
+	PortalAPIService        *PortalAPIService
+	ErrorService            *ErrorService
+	LoginService            *common_application.LoginService
+	SecretService           *service.SecretService
+	URLRepository           *persistence.URLRepository
+	APIRepository           *persistence.APIRepository
+	LoginRepository         *common_repo.LoginRepository
+	APIClient               *client.APIClient
+	LoginClient             *common_client.LoginClient
+	PageResourceFactory     *resource.PageResourceFactory
 }
 
 func InitBean() (*Bean, error) {
@@ -46,52 +59,53 @@ func InitBean() (*Bean, error) {
 		return nil, err
 	}
 
-	apiClient := client.NewAPIClient(
-		util.GetEnvDefault("SMAREST_API_HOST", "http://localhost:8080"),
+	bean := &Bean{}
+	bean.COOKIE_TOKEN_RESTAURANT = util.GetEnvDefault("COOKIE_TOKEN_RESTAURANT", "res_token")
+	bean.APIClient = client.NewAPIClient(
+		util.GetEnvDefault("SMAREST_API_HOST", "http://localhost:8081"),
 		apiTimeout,
 	)
 
-	loginClient := cClient.NewLoginClient(
+	bean.LoginClient = common_client.NewLoginClient(
 		util.GetEnvDefault("POS_USER_HOST", "http://localhost:8080"),
 		userTimeout,
 	)
-	loginRepository := cRepo.NewLoginRepository(loginClient)
-	apiRepository := persistence.NewAPIRepository(apiClient, loginClient)
+	bean.LoginRepository = common_repo.NewLoginRepository(bean.LoginClient)
+	bean.APIRepository = persistence.NewAPIRepository(bean.APIClient, bean.LoginClient)
 
-	pageResourceFactory := resource.NewPageResourceFactory(util.GetEnvDefault("POS_LOGIN_URL", "http://localhost:8080/login"),
+	bean.PageResourceFactory = resource.NewPageResourceFactory(util.GetEnvDefault("POS_LOGIN_URL", "http://localhost:8080/login"),
 		util.GetEnvDefault("POS_DESIGN_URL", "http://localhost/pos/pos-lib"),
 		util.GetEnvDefault("POS_IMAGE_URL", "http://localhost"))
 
-	loginService := application.NewLoginService(util.GetEnvDefault("POS_LOGIN_URL", "http://localhost:8080/login"),
+	bean.LoginService = common_application.NewLoginService(util.GetEnvDefault("POS_LOGIN_URL", "http://localhost:8080/login"),
 		util.GetEnvDefault("POS_LOGIN_TOKEN", "pos_access_token"),
-		loginRepository)
+		bean.LoginRepository)
 
-	cashierService := NewCashierService(loginService, apiRepository, pageResourceFactory)
-	orderService := NewOrderService(loginService, apiRepository, pageResourceFactory)
-	checkoutService := NewCheckoutService(loginService, apiRepository, pageResourceFactory)
-	restaurantService := NewRestaurantService(apiRepository, pageResourceFactory)
-	portalAPIService := NewPortalAPIService(loginService, apiRepository)
+	bean.SecretService = service.NewSecretService(util.GetEnvDefault("SMAREST_RESTAURANT_TOKEN", "b3BlbnNzaC1rZXktdjEAAAAACm"))
+
+	bean.CookieCheckService = NewCookieCheckService(bean)
+	bean.RestaurantService = NewRestaurantService(bean)
+	bean.CashierService = NewCashierService(bean)
+	bean.OrderService = NewOrderService(bean)
+	bean.CheckoutService = NewCheckoutService(bean)
+	bean.PortalAPIService = NewPortalAPIService(bean)
+	bean.ErrorService = NewErrorService(bean)
+	bean.URLRepository = persistence.NewURLRepository(util.GetEnvDefault("SMAREST_LOGIN_URL", "http://localhost:8080/login"))
 	// html layout
-	pageLayouts := make(map[string]string)
-	pageLayouts[PageCashier] = TemplatePath + "/page_cashier.html"
-	pageLayouts[PageOrder] = TemplatePath + "/page_order.html"
-	pageLayouts[PageCheckout] = TemplatePath + "/page_checkout.html"
-	pageLayouts[PageRestaurant] = TemplatePath + "/page_restaurant.html"
+	bean.PageLayouts = make(map[string]string)
+	bean.PageLayouts[PageCashier] = TemplatePath + "/page_cashier.html"
+	bean.PageLayouts[PageOrder] = TemplatePath + "/page_order.html"
+	bean.PageLayouts[PageCheckout] = TemplatePath + "/page_checkout.html"
+	bean.PageLayouts[PageRestaurant] = TemplatePath + "/page_restaurant.html"
+	bean.PageLayouts[PageError] = TemplatePath + "/page_error.html"
 
 	//common
-	commonLayouts := make(map[string]string)
-	commonLayouts[CommonHeader] = TemplatePath + "/commons/header.html"
-	commonLayouts[CommonFooter] = TemplatePath + "/commons/footer.html"
-	commonLayouts[CommonTitle] = TemplatePath + "/commons/title.html"
+	bean.CommonLayouts = make(map[string]string)
+	bean.CommonLayouts[CommonHeader] = TemplatePath + "/commons/header.html"
+	bean.CommonLayouts[CommonFooter] = TemplatePath + "/commons/footer.html"
+	bean.CommonLayouts[CommonTitle] = TemplatePath + "/commons/title.html"
 
-	return &Bean{
-		PageLayouts:       pageLayouts,
-		CommonLayouts:     commonLayouts,
-		CashierService:    cashierService,
-		CheckoutService:   checkoutService,
-		RestaurantService: restaurantService,
-		PortalAPIService:  portalAPIService,
-		OrderService:      orderService}, nil
+	return bean, nil
 }
 
 func (bean *Bean) LoadTemplates() multitemplate.Renderer {
@@ -119,5 +133,11 @@ func (bean *Bean) LoadTemplates() multitemplate.Renderer {
 
 	//restaurantPage
 	render.AddFromFiles(PageRestaurant, bean.PageLayouts[PageRestaurant])
+
+	//errorPage
+	render.AddFromFiles(PageError,
+		bean.PageLayouts[PageError],
+		bean.CommonLayouts[CommonTitle],
+		bean.CommonLayouts[CommonHeader])
 	return render
 }

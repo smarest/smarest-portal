@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+{{template "header" .}}
+<body>
+  <style>
+
+    .container {
+      position: relative;
+    }
+    .center {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 100%;
+    }
+    p{
+      padding: 10px;
+      font-size: 18px;
+      text-align: center;
+      margin: 20px;
+    }
+    img {
+      width: 100%;
+      height: auto;
+      z-index: -1;
+    }
+  </style>
+  {{template "title" .}}
+  <div class="container">
+    <img src="{{ $.resource.DesignUrl }}/images/ic_logo_splash.png">
+  </div>
+  <div class="center">
+    <p class="rounded background-color--yellow">Phat sinh loi, vui long lien he bo phan ky thuat</p>
+  </div>
+</body>
+</html>
