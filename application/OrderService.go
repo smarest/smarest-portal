@@ -18,7 +18,7 @@ func NewOrderService(bean *Bean) *OrderService {
 }
 
 func (s *OrderService) Get(c *gin.Context) {
-	cookieCheckResult := s.Bean.CookieCheckService.Check(c)
+	cookieCheckResult := s.Bean.CookieCheckService.Check(c, PageOrder)
 	if cookieCheckResult.IsRedirect() {
 		c.Redirect(http.StatusMovedPermanently, cookieCheckResult.RedirectURL)
 		return

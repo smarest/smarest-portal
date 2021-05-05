@@ -3,98 +3,89 @@
 {{template "header" .}}
 
 <body>
-  {{template "title" .}}
-  <div class="dragbar-container">
-    <div class="dragbar-container__left">
-      <div class="white-space--nowrap sticky--top">
-        {{ if .resource.OrderNumberID }}
-        <input type="hidden" id="number_id" name="number_id" value="{{ .resource.OrderNumberID }}" />
-        {{end}}
-        <label class="color--gray">Khu vuc: </label>
-        <select id="select_area">
+    {{template "title" .}}
+    <div class="dragbar-container">
+        <div class="dragbar-container__left">
+            <div class="white-space--nowrap sticky--top">
+                {{ if .resource.OrderNumberID }}
+                <input type="hidden" id="number_id" name="number_id" value="{{ .resource.OrderNumberID }}" /> {{end}}
+                <label class="color--gray">Khu vuc: </label>
+                <select id="select_area">
           {{ range $.resource.Areas }}
           <option value="{{ .id }}" {{if $.resource.IsEqual $.resource.AreaID .id }}selected{{end}}>
             {{ .name }}
           </option>
           {{ end }}
         </select>
-        <label class="color--gray">Ban: </label>
-        <select id="select_table">
+                <label class="color--gray">Ban: </label>
+                <select id="select_table">
           {{ range $.resource.Tables }}
           <option value="{{ .id }}">
             {{.name}}
           </option>
           {{end}}
         </select>
-        <a class="rounded hover--green padding float--right margin--left"
-          onclick="submitAndCheckOutOrder();return false;">Thanh toan</a>
-        <a class="rounded hover--blue padding float--right" onclick="submitOrder();return false;">Goi mon</a>
-      </div>
-      <table id="ordered_list_table">
-        <tr>
-          <th>Ban</th>
-          <th>[{{ $.resource.SumOrdersCount}}] mon</th>
-          <th class="white-space--nowrap" colspan="3">Tong tien[{{ $.resource.Comma $.resource.SumOrdersPrice}}]</th>
-        </tr>
-        {{ range $.resource.Orders }}
-        <tr data-order-id="{{ .id }}" data-table-id="{{ .tableID }}" data-pid="{{ .productID }}"
-          data-name="{{ .productName }}" data-count="{{ $.resource.Int64 .count }}" data-price="{{ $.resource.Int64 .price }}">
-          <td><strong class="white-space--nowrap rounded background-color--gray padding">{{ .tableName }}</strong></td>
-          <td class="width--full"><strong class="color--blue">[{{ .count }}]{{ .productName }}</strong>
-            <div>{{ .comments }}</div>
-          </td>
-          <td class="text-align--right white-space--nowrap"><span class="rounded background-color--yellow padding">{{
+                <a class="rounded hover--green padding float--right margin--left" onclick="submitAndCheckOutOrder();return false;">Thanh toan</a>
+                <a class="rounded hover--blue padding float--right" onclick="submitOrder();return false;">Goi mon</a>
+            </div>
+            <table id="ordered_list_table">
+                <tr>
+                    <th>Ban</th>
+                    <th>[{{ $.resource.SumOrdersCount}}] mon</th>
+                    <th class="white-space--nowrap" colspan="3">Tong tien[{{ $.resource.Comma $.resource.SumOrdersPrice}}]</th>
+                </tr>
+                {{ range $.resource.Orders }}
+                <tr data-order-id="{{ .id }}" data-table-id="{{ .tableID }}" data-pid="{{ .productID }}" data-name="{{ .productName }}" data-count="{{ $.resource.Int64 .count }}" data-price="{{ $.resource.Int64 .price }}">
+                    <td><strong class="white-space--nowrap rounded background-color--gray padding">{{ .tableName }}</strong></td>
+                    <td class="width--full"><strong class="color--blue">[{{ .count }}]{{ .productName }}</strong>
+                        <div>{{ .comments }}</div>
+                    </td>
+                    <td class="text-align--right white-space--nowrap"><span class="rounded background-color--yellow padding">{{
               $.resource.Comma ( $.resource.Mul ($.resource.Int64 .count) ($.resource.Int64 .price)) }}</span></td>
-          <td class="text-align--center"><img onclick="onAddRow(this)" width="24px" height="24px"
-              src="{{ $.resource.DesignUrl }}/images/ic_add.png" alt="Them"></td>
-          <td class="text-align--center"><img onclick="onDeleteRow(this)" width="24px" height="24px"
-              src="{{ $.resource.DesignUrl }}/images/ic_close.png" alt="Xoa"></td>
-        </tr>
-        {{end}}
-      </table>
-    </div>
-    <div class="dragbar-container__dragbar"></div>
-    <div class="dragbar-container__right">
-      <div id="category_menu" class="scroll-menu margin--bottom sticky--top">
-        {{ range $.resource.Categories }}
-        <a class="hover--gray {{if $.resource.IsEqual $.resource.CategoryID .id }}active{{end}}" data-id="{{.id}}"
-          href="#" onclick="loadOrderProducts(this);return false;">
+                    <td class="text-align--center"><img onclick="onAddRow(this)" width="24px" height="24px" src="{{ $.resource.DesignUrl }}/images/ic_add.png" alt="Them"></td>
+                    <td class="text-align--center"><img onclick="onDeleteRow(this)" width="24px" height="24px" src="{{ $.resource.DesignUrl }}/images/ic_close.png" alt="Xoa"></td>
+                </tr>
+                {{end}}
+            </table>
+        </div>
+        <div class="dragbar-container__dragbar"></div>
+        <div class="dragbar-container__right">
+            <div id="category_menu" class="scroll-menu margin--bottom sticky--top">
+                {{ range $.resource.Categories }}
+                <a class="hover--gray {{if $.resource.IsEqual $.resource.CategoryID .id }}active{{end}}" data-id="{{.id}}" href="#" onclick="loadOrderProducts(this);return false;">
           {{.name}}
-        </a>
-        {{end}}
-      </div>
-      <div class="dragbar-container__right__bottom">
-        <div id="order_center_list" class="grid-container">
-          {{ range $.resource.Products }}
-          <div class="hover--blue" onclick="onOrderProductClick({{ .id }}
+        </a> {{end}}
+            </div>
+            <div class="dragbar-container__right__bottom">
+                <div id="order_center_list" class="grid-container">
+                    {{ range $.resource.Products }}
+                    <div class="hover--blue" onclick="onOrderProductClick({{ .id }}
             ,'{{ .name }}',{{ .quantityOnSingleOrder }},{{ .price }});">
-            {{.name}}
-          </div>
-          {{end}}
-        </div>
-        <div id="order_bottom_list" class="hide grid-container padding--top">
-          {{ range $.resource.Comments }}
-          <div class="hover--green" onclick="onOrderProductCommentClick('{{.name}}');">{{.name}}</div>
-          {{end}}
-        </div>
-				{{ range .resource.ErrorMessages }}
-				<div class="alert background-color--red rounded">
-					<span class="alert__closebtn" onclick="onNotifiClose(this)">&times;</span>
-					<strong>Loi!</strong> {{ .resource.ErrorMessage }}
-				</div>
-				{{end}}
-				{{if .resource.Message }}
-				<div class="alert background-color--green rounded">
-					<span class="alert__closebtn" onclick="onNotifiClose(this)">&times;</span>
-					{{ .resource.Message }}
-				</div>
-				{{end}}
+                        {{.name}}
+                    </div>
+                    {{end}}
+                </div>
+                <div id="order_bottom_list" class="hide grid-container padding--top">
+                    {{ range $.resource.Comments }}
+                    <div class="hover--green" onclick="onOrderProductCommentClick('{{.name}}');">{{.name}}</div>
+                    {{end}}
+                </div>
+                {{ range .resource.ErrorMessages }}
+                <div class="alert background-color--red rounded">
+                    <span class="alert__closebtn" onclick="onNotifiClose(this)">&times;</span>
+                    <strong>Loi!</strong> {{ .resource.ErrorMessage }}
+                </div>
+                {{end}} {{if .resource.Message }}
+                <div class="alert background-color--green rounded">
+                    <span class="alert__closebtn" onclick="onNotifiClose(this)">&times;</span> {{ .resource.Message }}
+                </div>
+                {{end}}
 
-      </div>
+            </div>
+        </div>
     </div>
-  </div>
+    {{template "footer_content" .}}
 </body>
-{{template "footer" .}}
-<script type="text/javascript" src="{{ .resource.DesignUrl }}/js/portal/order_script.js"></script>
+{{template "footer_javascript" .}}
 
 </html>

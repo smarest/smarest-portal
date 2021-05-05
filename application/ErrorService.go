@@ -24,5 +24,5 @@ func (s *ErrorService) Get(c *gin.Context) {
 
 func (s *ErrorService) HandlerError(c *gin.Context, err *exception.Error) {
 	log.Print(err.ErrorMessage)
-	c.Redirect(http.StatusMovedPermanently, s.Bean.URLRepository.GetErrorURL())
+	//c.Redirect(http.StatusMovedPermanently, s.Bean.URLRepository.GetErrorURL())
 }

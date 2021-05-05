@@ -1,27 +1,37 @@
-{{define "footer"}}
+{{define "footer_content"}}
 <footer>
+    <div>Copyright © AnIT</div>
 </footer>
 <!-- The Modal -->
 <div id="dialog" class="modal-dialog">
-  <!-- Modal content -->
-  <div class="modal-dialog__content animate">
-    <span class="modal-dialog__close" onClick="closeAlertDialog()">&times;</span>
-    <div class="modal-dialog__content__body">
-      <h2 class="modal-dialog__content__title">Title</h2>
-      <p class="modal-dialog__content__message">message</p>
-      <div class="modal-dialog__content__button">
-        <button class="modal-dialog__cancel hover--red" onClick="closeAlertDialog()">cancel</button>
-        <button class="modal-dialog__ok hover--green" onClick="closeAlertDialog()">ok</button>
-      </div>
+    <!-- Modal content -->
+    <div class="modal-dialog__content animate">
+        <span class="modal-dialog__close" onClick="closeAlertDialog()">&times;</span>
+        <div class="modal-dialog__content__body">
+            <h2 class="modal-dialog__content__title">Title</h2>
+            <p class="modal-dialog__content__message">message</p>
+            <div class="modal-dialog__content__button">
+                <button class="modal-dialog__cancel hover--red" onClick="closeAlertDialog()">cancel</button>
+                <button class="modal-dialog__ok hover--green" onClick="closeAlertDialog()">ok</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
+{{end}} {{define "footer_javascript"}}
 <script>
-  window.imageUrl = '{{ .resource.ImageUrl }}';
-  window.designUrl = '{{ .resource.DesignUrl }}';
-  //window.apiUrl = '';
-  window.loginUrl = '{{ .resource.LoginUrl }}';
+    window.imageUrl = '{{ .resource.ImageUrl }}';
+    window.designUrl = '{{ .resource.DesignUrl }}';
+    //window.apiUrl = '';
+    window.loginUrl = '{{ .resource.LoginUrl }}';
 </script>
 <script type="text/javascript" src="{{ .resource.DesignUrl }}/js/jquery.dragBar.js"></script>
-<script type="text/javascript" src="{{ .resource.DesignUrl }}/js/common_script.js"></script>
-{{end}}
+<script type="text/javascript" src="{{ .resource.DesignUrl }}/js/common.js"></script>
+{{ if .resource.IsCashier }}
+<script type="text/javascript" src="{{ .resource.DesignUrl }}/js/portal/cashier.js"></script>
+{{end}} {{ if .resource.IsCheckOut }}
+<script type="text/javascript" src="{{ .resource.DesignUrl }}/js/portal/checkout.js"></script>
+{{end}} {{ if .resource.IsOrder }}
+<script type="text/javascript" src="{{ .resource.DesignUrl }}/js/portal/order.js"></script>
+{{end}} {{ if .resource.IsKitchen }}
+<script type="text/javascript" src="{{ .resource.DesignUrl }}/js/portal/kitchen.js"></script>
+{{end}} {{end}}

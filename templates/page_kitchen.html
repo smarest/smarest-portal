@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+{{template "header" .}}
+
+<body>
+    {{template "title" .}}
+    <div class="tab">
+        <div class="tab__title">
+            <a id="tab_sort_by_product" href="#">Sort by product</a>
+            <a id="tab_sort_by_time" href="#">Sort by time</a>
+        </div>
+        <div class="tab__content grid-container"></div>
+    </div>
+    {{template "footer_content" .}}
+</body>
+{{template "footer_javascript" .}}
+
+</html>

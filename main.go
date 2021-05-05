@@ -18,6 +18,7 @@ func main() {
 	portal := router.Group("portal")
 	{
 		portal.GET("/cashier", bean.CashierService.Get)
+		portal.GET("/kitchen", bean.KitchenService.Get)
 		portal.GET("/order", bean.OrderService.Get)
 		portal.GET("/checkout", bean.CheckoutService.Get)
 		portal.GET("/restaurant", bean.RestaurantService.Get)
@@ -32,6 +33,7 @@ func main() {
 		v1.GET("/categories", bean.PortalAPIService.GetCategories)
 		v1.GET("/categories/:id/products", bean.PortalAPIService.GetProducts)
 		v1.GET("/products/:id/comments", bean.PortalAPIService.GetCommentsByProductID)
+		v1.GET("/orders", bean.PortalAPIService.GetOrders)
 		v1.PUT("/orders", bean.PortalAPIService.PutOrders)
 	}
 	router.Run(":9090")

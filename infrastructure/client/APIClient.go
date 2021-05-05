@@ -44,8 +44,13 @@ func (c *APIClient) GetRestaurantOrdersByAreaID(restID int64, areaID int64) (*ht
 	return c.DoGetRequest(url)
 }
 
+func (c *APIClient) GetRestaurantOrders(restID int64, orderBy string, groupBy string) (*http.Response, error) {
+	url := fmt.Sprintf("%s%s/%d/orders?orderBy=%s&groupBy=%s", c.Host, c.RestaurantEntryPoint, restID, orderBy, groupBy)
+	return c.DoGetRequest(url)
+}
+
 func (c *APIClient) GetRestaurantOrdersByOrderNumberID(restID int64, orderNumberID int64) (*http.Response, error) {
-	url := fmt.Sprintf("%s%s/%d/orders?orderNumberID=%d", c.Host, c.RestaurantEntryPoint, restID, orderNumberID)
+	url := fmt.Sprintf("%s%s/%d/orders?orderNumberID=%d&orderBy=product", c.Host, c.RestaurantEntryPoint, restID, orderNumberID)
 	return c.DoGetRequest(url)
 }
 
