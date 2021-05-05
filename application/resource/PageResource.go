@@ -11,7 +11,9 @@ type PageResource struct {
 	ErrorMessages []string
 	Message       string
 	IsCashier     bool
+	IsCheckOut    bool
 	IsOrder       bool
+	IsKitchen     bool
 	OrderNumberID string
 	Restaurants   []interface{}
 	Areas         []interface{}

@@ -16,7 +16,7 @@ func NewCashierService(bean *Bean) *CashierService {
 }
 
 func (s *CashierService) Get(c *gin.Context) {
-	cookieCheckResult := s.Bean.CookieCheckService.Check(c)
+	cookieCheckResult := s.Bean.CookieCheckService.Check(c, PageCashier)
 	if cookieCheckResult.IsRedirect() {
 		c.Redirect(http.StatusMovedPermanently, cookieCheckResult.RedirectURL)
 		return

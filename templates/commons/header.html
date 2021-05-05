@@ -1,12 +1,13 @@
 {{define "header"}}
+
 <head>
-  <title>{{ .resource.PageTitle }}</title>
-  <link rel="shortcut icon" href="{{ $.resource.DesignUrl }}/images/favicon.ico">
-  <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="{{ $.resource.DesignUrl }}/css/common_style.css">
-  {{ if .resource.IsCashier }}
-  <link rel="stylesheet" type="text/css" href="{{ $.resource.DesignUrl }}/css/portal/cashier.css">
-  {{end}}
+    <title>{{ .resource.PageTitle }}</title>
+    <link rel="shortcut icon" href="{{ $.resource.DesignUrl }}/images/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ $.resource.DesignUrl }}/css/common.css"> {{ if .resource.IsCashier }}
+    <link rel="stylesheet" type="text/css" href="{{ $.resource.DesignUrl }}/css/portal/cashier.css"> {{end}} {{ if .resource.IsCheckOut }}
+    <link rel="stylesheet" type="text/css" href="{{ $.resource.DesignUrl }}/css/portal/checkout.css"> {{end}} {{ if .resource.IsKitchen }}
+    <link rel="stylesheet" type="text/css" href="{{ $.resource.DesignUrl }}/css/portal/kitchen.css"> {{end}}
 </head>
 {{end}}

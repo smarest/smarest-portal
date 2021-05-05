@@ -19,7 +19,7 @@ func NewRestaurantService(bean *Bean) *RestaurantService {
 }
 
 func (s *RestaurantService) Get(c *gin.Context) {
-	cookieCheckResult := s.Bean.CookieCheckService.Check(c)
+	cookieCheckResult := s.Bean.CookieCheckService.Check(c, "")
 	if cookieCheckResult.IsLoginRedirect {
 		c.Redirect(http.StatusMovedPermanently, cookieCheckResult.RedirectURL)
 		return
@@ -35,7 +35,7 @@ func (s *RestaurantService) Get(c *gin.Context) {
 }
 
 func (s *RestaurantService) Post(c *gin.Context) {
-	cookieCheckResult := s.Bean.CookieCheckService.Check(c)
+	cookieCheckResult := s.Bean.CookieCheckService.Check(c, "")
 	if cookieCheckResult.IsLoginRedirect {
 		c.Redirect(http.StatusMovedPermanently, cookieCheckResult.RedirectURL)
 		return

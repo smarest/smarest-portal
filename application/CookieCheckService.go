@@ -29,7 +29,7 @@ func NewCookieCheckService(bean *Bean) *CookieCheckService {
 	return &CookieCheckService{bean}
 }
 
-func (s *CookieCheckService) Check(c *gin.Context) *CheckResult {
+func (s *CookieCheckService) Check(c *gin.Context, fromPage string) *CheckResult {
 	var err *exception.Error
 	/*	_, err := s.CheckCookie(c)
 		if err != nil {
@@ -48,7 +48,7 @@ func (s *CookieCheckService) Check(c *gin.Context) *CheckResult {
 	result.Restaurant, err = s.CheckRestaurantCookie(c)
 	if err != nil {
 		result.IsRestaurantRedirect = true
-		result.RedirectURL = s.Bean.URLRepository.GetPageRedirectURL(PageCashier, PageRestaurant)
+		result.RedirectURL = s.Bean.URLRepository.GetPageRedirectURL(fromPage, PageRestaurant)
 		return result
 	}
 	return result

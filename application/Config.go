@@ -17,6 +17,7 @@ import (
 
 const (
 	PageCashier    = "cashier"
+	PageKitchen    = "kitchen"
 	PageOrder      = "order"
 	PageCheckout   = "checkout"
 	PageRestaurant = "restaurant"
@@ -34,6 +35,7 @@ type Bean struct {
 	CookieCheckService      *CookieCheckService
 	CashierService          *CashierService
 	OrderService            *OrderService
+	KitchenService          *KitchenService
 	CheckoutService         *CheckoutService
 	RestaurantService       *RestaurantService
 	PortalAPIService        *PortalAPIService
@@ -74,8 +76,8 @@ func InitBean() (*Bean, error) {
 	bean.APIRepository = persistence.NewAPIRepository(bean.APIClient, bean.LoginClient)
 
 	bean.PageResourceFactory = resource.NewPageResourceFactory(util.GetEnvDefault("POS_LOGIN_URL", "http://localhost:8080/login"),
-		util.GetEnvDefault("POS_DESIGN_URL", "http://localhost/pos/pos-lib"),
-		util.GetEnvDefault("POS_IMAGE_URL", "http://localhost"))
+		util.GetEnvDefault("POS_DESIGN_URL", "http://localhost/pos/smarest-design"),
+		util.GetEnvDefault("POS_IMAGE_URL", "http://localhost/pos/smarest-design"))
 
 	bean.LoginService = common_application.NewLoginService(util.GetEnvDefault("POS_LOGIN_URL", "http://localhost:8080/login"),
 		util.GetEnvDefault("POS_LOGIN_TOKEN", "pos_access_token"),
@@ -86,6 +88,7 @@ func InitBean() (*Bean, error) {
 	bean.CookieCheckService = NewCookieCheckService(bean)
 	bean.RestaurantService = NewRestaurantService(bean)
 	bean.CashierService = NewCashierService(bean)
+	bean.KitchenService = NewKitchenService(bean)
 	bean.OrderService = NewOrderService(bean)
 	bean.CheckoutService = NewCheckoutService(bean)
 	bean.PortalAPIService = NewPortalAPIService(bean)
@@ -94,6 +97,7 @@ func InitBean() (*Bean, error) {
 	// html layout
 	bean.PageLayouts = make(map[string]string)
 	bean.PageLayouts[PageCashier] = TemplatePath + "/page_cashier.html"
+	bean.PageLayouts[PageKitchen] = TemplatePath + "/page_kitchen.html"
 	bean.PageLayouts[PageOrder] = TemplatePath + "/page_order.html"
 	bean.PageLayouts[PageCheckout] = TemplatePath + "/page_checkout.html"
 	bean.PageLayouts[PageRestaurant] = TemplatePath + "/page_restaurant.html"
@@ -127,6 +131,13 @@ func (bean *Bean) LoadTemplates() multitemplate.Renderer {
 	//checkoutPage
 	render.AddFromFiles(PageCheckout,
 		bean.PageLayouts[PageCheckout],
+		bean.CommonLayouts[CommonTitle],
+		bean.CommonLayouts[CommonHeader],
+		bean.CommonLayouts[CommonFooter])
+
+	//kitchenPage
+	render.AddFromFiles(PageKitchen,
+		bean.PageLayouts[PageKitchen],
 		bean.CommonLayouts[CommonTitle],
 		bean.CommonLayouts[CommonHeader],
 		bean.CommonLayouts[CommonFooter])

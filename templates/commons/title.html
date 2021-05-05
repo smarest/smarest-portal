@@ -1,13 +1,15 @@
 {{define "title"}}
 <div id="navbar" class="navbar">
-  <a {{ if .resource.IsCashier }} class="active" {{end}} href="/portal/cashier">Thanh toan</a>
-  <a {{ if .resource.IsOrder }} class="active" {{end}} href="/portal/order">Goi mon</a>
-  <div class="dropdown">
-    <button class="dropbtn">Khac</button>
-    <div class="dropdown-content">
-      <a href="/portal/restaurant?frm={{ if .resource.IsCashier }}cashier{{ else }}order{{end}}">Chon nha hang</a>
-      <a href="#">Chua phat trien</a>
+    <a {{ if or .resource.IsCashier .resource.IsCheckOut }} class="active" {{end}} href="/portal/cashier">Thanh toan</a>
+    <a {{ if .resource.IsOrder }} class="active" {{end}} href="/portal/order">Goi mon</a>
+    <a {{ if .resource.IsKitchen }} class="active" {{end}} href="/portal/kitchen">Bep</a>
+    <div class="navbar__dropdown">
+        <button class="dropdown__dropbtn">Khac</button>
+        <div class="dropdown__content">
+            <a href="/portal/restaurant?frm={{ if .resource.IsCashier }}cashier{{ else }}order{{end}}">Chon nha hang</a>
+            <a href="#">Chua phat trien</a>
+        </div>
     </div>
-  </div>
+    <!--div class="navbar__jweb-status float--right" href="#"></div-->
 </div>
 {{end}}

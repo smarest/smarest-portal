@@ -17,15 +17,15 @@ func NewCheckoutService(bean *Bean) *CheckoutService {
 }
 
 func (s *CheckoutService) Get(c *gin.Context) {
-	cookieCheckResult := s.Bean.CookieCheckService.Check(c)
+	cookieCheckResult := s.Bean.CookieCheckService.Check(c, PageCheckout)
 	if cookieCheckResult.IsRedirect() {
 		c.Redirect(http.StatusMovedPermanently, cookieCheckResult.RedirectURL)
 		return
 	}
 
 	resource := s.Bean.PageResourceFactory.CreateResource()
-	resource.IsCashier = true
-	resource.PageTitle = "Checkout"
+	resource.IsCheckOut = true
+	resource.PageTitle = "CheckOut"
 
 	orderNumberIDStr := c.Query("orderNumberID")
 	if orderNumberIDStr == "" {

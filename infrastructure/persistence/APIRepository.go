@@ -2,8 +2,7 @@ package persistence
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
+	"io"
 	"net/http"
 
 	commonClient "github.com/smarest/smarest-common/client"
@@ -27,13 +26,7 @@ func (r *APIRepository) GetAreasByRestaurantID(restID int64) ([]interface{}, *ex
 		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
 	}
 
-	results, err := r.GetResponses(resp)
-	if err != nil {
-		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
-	}
-
-	return results, nil
-
+	return r.GetResponses(resp)
 }
 
 func (r *APIRepository) GetRestaurantsByGroupID(groupID int64) ([]interface{}, *exception.Error) {
@@ -43,12 +36,7 @@ func (r *APIRepository) GetRestaurantsByGroupID(groupID int64) ([]interface{}, *
 		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
 	}
 
-	result, err := r.GetResponses(resp)
-	if err != nil {
-		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
-	}
-
-	return result, nil
+	return r.GetResponses(resp)
 }
 
 func (r *APIRepository) GetRestaurantByCode(code string) (interface{}, *exception.Error) {
@@ -58,13 +46,7 @@ func (r *APIRepository) GetRestaurantByCode(code string) (interface{}, *exceptio
 		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
 	}
 
-	result, err := r.GetResponse(resp)
-	if err != nil {
-		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
-	}
-
-	return result, nil
-
+	return r.GetResponse(resp)
 }
 
 func (r *APIRepository) GetRestaurantByID(id int64) (interface{}, *exception.Error) {
@@ -74,13 +56,7 @@ func (r *APIRepository) GetRestaurantByID(id int64) (interface{}, *exception.Err
 		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
 	}
 
-	result, err := r.GetResponse(resp)
-	if err != nil {
-		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
-	}
-
-	return result, nil
-
+	return r.GetResponse(resp)
 }
 
 func (r *APIRepository) GetRestaurantOrdersByAreaID(restID int64, areaID int64) ([]interface{}, *exception.Error) {
@@ -90,12 +66,17 @@ func (r *APIRepository) GetRestaurantOrdersByAreaID(restID int64, areaID int64) 
 		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
 	}
 
-	user, err := r.GetResponses(resp)
+	return r.GetResponses(resp)
+}
+
+func (r *APIRepository) GetRestaurantOrders(restID int64, orderBy string, groupBy string) ([]interface{}, *exception.Error) {
+
+	resp, err := r.Client.GetRestaurantOrders(restID, orderBy, groupBy)
 	if err != nil {
 		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
 	}
 
-	return user, nil
+	return r.GetResponses(resp)
 
 }
 
@@ -106,12 +87,7 @@ func (r *APIRepository) GetRestaurantOrdersByOrderNumberID(restID int64, orderNu
 		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
 	}
 
-	orders, err := r.GetResponses(resp)
-	if err != nil {
-		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
-	}
-
-	return orders, nil
+	return r.GetResponses(resp)
 
 }
 
@@ -122,12 +98,7 @@ func (r *APIRepository) GetRestaurantTablesByAreaID(restID int64, areaID int64) 
 		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
 	}
 
-	user, err := r.GetResponses(resp)
-	if err != nil {
-		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
-	}
-
-	return user, nil
+	return r.GetResponses(resp)
 
 }
 
@@ -138,13 +109,7 @@ func (r *APIRepository) GetCategoriesByGroupID(groupID int64) ([]interface{}, *e
 		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
 	}
 
-	user, err := r.GetResponses(resp)
-	if err != nil {
-		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
-	}
-
-	return user, nil
-
+	return r.GetResponses(resp)
 }
 
 func (r *APIRepository) GetProductsByRestaurantIDAndCategoryID(areaID int64, categoryID int64) ([]interface{}, *exception.Error) {
@@ -154,13 +119,7 @@ func (r *APIRepository) GetProductsByRestaurantIDAndCategoryID(areaID int64, cat
 		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
 	}
 
-	user, err := r.GetResponses(resp)
-	if err != nil {
-		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
-	}
-
-	return user, nil
-
+	return r.GetResponses(resp)
 }
 
 func (r *APIRepository) GetRestaurantCommentsByProductID(restID int64, productID int64) ([]interface{}, *exception.Error) {
@@ -170,13 +129,7 @@ func (r *APIRepository) GetRestaurantCommentsByProductID(restID int64, productID
 		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
 	}
 
-	user, err := r.GetResponses(resp)
-	if err != nil {
-		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
-	}
-
-	return user, nil
-
+	return r.GetResponses(resp)
 }
 
 func (r *APIRepository) PutRestaurantOrders(restID int64, v interface{}) (interface{}, *exception.Error) {
@@ -184,67 +137,45 @@ func (r *APIRepository) PutRestaurantOrders(restID int64, v interface{}) (interf
 	if err != nil {
 		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
 	}
-
-	id, err := r.GetResponse(resp)
-	if err != nil {
-		return nil, exception.CreateError(exception.CodeUnknown, err.Error())
-	}
-
-	return id, nil
+	return r.GetResponse(resp)
 
 }
 
-func (s *APIRepository) GetResponses(resp *http.Response) ([]interface{}, error) {
+func (s *APIRepository) GetResponses(resp *http.Response) ([]interface{}, *exception.Error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		var errResponse exception.Error
-		err := json.NewDecoder(resp.Body).Decode(&errResponse)
-		if err != nil {
-			return nil, fmt.Errorf("can not decode login response. [%w]", err)
-		}
-		if errResponse.ErrorCode == exception.CodeNotFound {
-			return nil, fmt.Errorf("not found")
-		}
-		if errResponse.ErrorCode == exception.CodeValueInvalid {
-			return nil, fmt.Errorf("request value invalid")
-		}
-		return nil, fmt.Errorf("api has error. [%s]", errResponse.ErrorMessage)
+		return nil, s.GetErrorResponse(resp.Body)
 	}
 
 	var items []interface{}
 	err := json.NewDecoder(resp.Body).Decode(&items)
 	if err != nil {
-		fmt.Printf("%v", resp.Body)
-		return nil, fmt.Errorf("can not decode response. [%w]", err)
+		return nil, exception.CreateErrorWithRootCause(exception.CodeUnknown, "can not decode responses.", err)
 	}
 	return items, nil
 }
 
-func (s *APIRepository) GetResponse(resp *http.Response) (interface{}, error) {
+func (s *APIRepository) GetResponse(resp *http.Response) (interface{}, *exception.Error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		var errResponse exception.Error
-		err := json.NewDecoder(resp.Body).Decode(&errResponse)
-
-		log.Print(errResponse.ErrorMessage)
-		if err != nil {
-			return nil, fmt.Errorf("can not decode login response. [%w]", err)
-		}
-		if errResponse.ErrorCode == exception.CodeNotFound {
-			return nil, fmt.Errorf("not found")
-		}
-		if errResponse.ErrorCode == exception.CodeValueInvalid {
-			return nil, fmt.Errorf("request value invalid")
-		}
-		return nil, fmt.Errorf("api has error. [%s]", errResponse.ErrorMessage)
+		return nil, s.GetErrorResponse(resp.Body)
 	}
 
 	var items interface{}
 	err := json.NewDecoder(resp.Body).Decode(&items)
 	if err != nil {
-		return nil, fmt.Errorf("can not decode response. [%w]", err)
+		return nil, exception.CreateErrorWithRootCause(exception.CodeUnknown, "can not decode response.", err)
 	}
 	return items, nil
+}
+
+func (s *APIRepository) GetErrorResponse(body io.ReadCloser) *exception.Error {
+	var errResponse exception.Error
+	err := json.NewDecoder(body).Decode(&errResponse)
+	if err != nil {
+		return exception.CreateErrorWithRootCause(exception.CodeUnknown, "Can not decode Error Message", err)
+	}
+	return &errResponse
 }
